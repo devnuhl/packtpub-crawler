@@ -35,7 +35,7 @@ def make_soup(response, debug=False):
     """
 
     print '[*] fetching url... {0} | {1}'.format(response.status_code, response.url)
-    soup = BeautifulSoup(response.text, from_encoding=response.encoding)
+    soup = BeautifulSoup(response.text, 'html5lib')
     if debug:
         print soup.prettify().encode('utf-8')
     return soup
@@ -45,7 +45,7 @@ def wait(delay):
         print '[-] going to sleep {0} seconds'.format(delay)
         sleep(delay)
 
-def download_file(r, url, directory, filename):
+def download_file(r, url, directory, filename, headers):
     """
     Downloads file with progress bar
     """
@@ -59,9 +59,14 @@ def download_file(r, url, directory, filename):
     path = os.path.join(directory, filename)
 
     print '[-] downloading file from url: {0}'.format(url)
-    response = r.get(url, stream=True)
+    response = r.get(url, headers=headers, stream=True)
+    #log_dict(response.headers)
+    total_length = 0
+    test_length = response.headers.get('content-length')
+    if test_length is not None:
+        total_length = int(test_length)    
+
     with open(path, 'wb') as f:
-        total_length = int(response.headers.get('content-length'))
         for chunk in progress.bar(response.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1):
             if chunk:
                 f.write(chunk)

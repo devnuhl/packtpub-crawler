@@ -20,6 +20,7 @@ class Packpub(object):
         }
 
     def __init_headers(self):
+        # improvement: random user agent
         return {
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Encoding': 'gzip, deflate',
@@ -75,7 +76,7 @@ class Packpub(object):
         self.info['title'] = title
         self.info['filename'] = title.encode('ascii', 'ignore').replace(' ', '_')
         self.info['description'] = div_target.select('div.dotd-main-book-summary > div')[2].text.strip()
-        self.info['url_image'] = 'https:' + div_target.select('div.dotd-main-book-image img')[0]['src']
+        self.info['url_image'] = 'https:' + div_target.select('div.dotd-main-book-image img')[0]['data-original']
         self.info['url_claim'] = self.__url_base + div_target.select('a.twelve-days-claim')[0]['href']
         # remove useless info
         self.info.pop('form_build_id', None)
@@ -125,7 +126,7 @@ class Packpub(object):
         directory = self.__config.get('path', 'path.ebooks')
         for download in downloads_info:
             self.info['paths'].append(
-                download_file(self.__session, download['url'], directory, download['filename']))
+                download_file(self.__session, download['url'], directory, download['filename'], self.__headers))
 
     def download_extras(self):
         """
@@ -135,8 +136,8 @@ class Packpub(object):
 
         url_image = self.info['url_image']
         filename = self.info['filename'] + '_' + split(url_image)[1]
-        self.info['paths'].append(download_file(self.__session, url_image, directory, filename))
+        self.info['paths'].append(download_file(self.__session, url_image, directory, filename, self.__headers))
 
         if 'url_source_code' in self.info:
             self.info['paths'].append(download_file(self.__session, self.info['url_source_code'], directory,
-                self.info['filename'] + '.zip'))
+                self.info['filename'] + '.zip', self.__headers))
