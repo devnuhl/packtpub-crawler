@@ -3,6 +3,7 @@ import ConfigParser
 from bs4 import BeautifulSoup
 from time import sleep
 from clint.textui import progress
+from datetime import datetime as dt
 import os, sys, itertools
 from threading import Thread
 from logs import *
@@ -53,7 +54,8 @@ def download_file(r, url, directory, filename):
         os.makedirs(directory)
         log_info('[+] created new directory: ' + directory)
 
-    filename = filename.replace(':', '-')
+    today = dt.utcnow().strftime('%Y-%m-%d')
+    filename = today + '-' + filename.replace(':', '-')
     path = os.path.join(directory, filename)
 
     print '[-] downloading file from url: {0}'.format(url)
